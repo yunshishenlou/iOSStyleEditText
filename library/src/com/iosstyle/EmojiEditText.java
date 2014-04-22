@@ -1,14 +1,11 @@
 package com.iosstyle;
 
-import java.nio.charset.Charset;
 
 import android.content.Context;
-import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
 import android.text.Editable;
 import android.text.InputFilter;
 import android.text.Spannable;
-import android.text.SpannableString;
 import android.text.Spanned;
 import android.text.TextUtils;
 import android.text.TextWatcher;
@@ -44,21 +41,10 @@ public class EmojiEditText extends EditText {
         filter = new InputFilter() {
             public CharSequence filter(CharSequence source, int start, int end,
                     Spanned dest, int dstart, int dend) {
-                if (TextUtils.isEmpty(source))
-                    return null;
-                byte[] bytes = source.toString().getBytes();
-                String hexStr = convert(bytes);
-                try {
-                    Resources resources = getContext().getResources();
-                    int id = resources.getIdentifier("emoji_" + hexStr,
-                            "drawable", getContext().getPackageName());
-                    if (id != 0) {
-                        return START_CHAR + hexStr + END_CHAR;
-                    }
-                } catch (Exception e) {
+                if (TextUtils.isEmpty(source)){
                     return null;
                 }
-                return null;
+                return EmojiCodec.getInstance(getContext().getApplicationContext()).formatToEmojiString(source.toString());
             }
         };
         this.setFilters(new InputFilter[] { filter });
@@ -76,42 +62,8 @@ public class EmojiEditText extends EditText {
             @Override
             public void afterTextChanged(Editable editable) {
                 emotifySpannable(editable);
-
-                String rawContent = editable.toString();
-
-                SpannableString spannable = new SpannableString(rawContent);
-                emotifySpannable(spannable);
             }
         });
-    }
-
-    public static String convert(byte[] bytes) {
-        try {
-            String str = new String(bytes, Charset.forName("UTF-8"));
-            int[] result = toCodePointArray(str);
-            for (int i = 0; i < result.length; i++) {
-                String hex_result = Integer.toHexString(result[i]);
-            }
-            int codePoint = str.codePointAt(0);
-            String hex_result = Integer.toHexString(codePoint);
-            return hex_result;
-        } catch (Exception e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-        return null;
-    }
-
-    public static int[] toCodePointArray(String str) {
-        char[] ach = str.toCharArray();
-        int len = ach.length;
-        int[] acp = new int[Character.codePointCount(ach, 0, len)];
-        int j = 0;
-        for (int i = 0, cp; i < len; i += Character.charCount(cp)) {
-            cp = Character.codePointAt(ach, i);
-            acp[j++] = cp;
-        }
-        return acp;
     }
 
     /**
