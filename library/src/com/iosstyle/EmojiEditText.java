@@ -1,5 +1,5 @@
-package com.iosstyle;
 
+package com.iosstyle;
 
 import android.content.Context;
 import android.graphics.drawable.Drawable;
@@ -14,11 +14,11 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.widget.EditText;
 
+import java.util.logging.Logger;
+
 public class EmojiEditText extends EditText {
 
-    private static final String TAG = EmojiEditText.class.getName();
-    private static final String START_CHAR = "[";
-    private static final String END_CHAR = "]";
+    private static final String TAG = "Denny";
 
     private InputFilter filter;
 
@@ -37,26 +37,35 @@ public class EmojiEditText extends EditText {
         init();
     }
 
+    public String getOriginStr() {
+        String originStr = EmojiCodec.getInstance(getContext().getApplicationContext()).getOriginString(
+                getEditableText().toString());
+        Log.i(TAG,"originStr:"+originStr);
+        byte[] bytes = originStr.getBytes();
+        return originStr;
+    }
+
     private void init() {
         filter = new InputFilter() {
-            public CharSequence filter(CharSequence source, int start, int end,
-                    Spanned dest, int dstart, int dend) {
-                if (TextUtils.isEmpty(source)){
+            public CharSequence filter(CharSequence source, int start, int end, Spanned dest,
+                    int dstart, int dend) {
+                if (TextUtils.isEmpty(source)) {
                     return null;
                 }
-                return EmojiCodec.getInstance(getContext().getApplicationContext()).formatToEmojiString(source.toString());
+                return EmojiCodec.getInstance(getContext().getApplicationContext())
+                        .convertToEmojiString(source.toString());
             }
         };
-        this.setFilters(new InputFilter[] { filter });
+        this.setFilters(new InputFilter[] {
+            filter
+        });
         this.addTextChangedListener(new TextWatcher() {
             @Override
-            public void beforeTextChanged(CharSequence charSequence, int i,
-                    int i1, int i2) {
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
             }
 
             @Override
-            public void onTextChanged(CharSequence charSequence, int i, int i1,
-                    int i2) {
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
             }
 
             @Override
@@ -86,7 +95,7 @@ public class EmojiEditText extends EditText {
         do {
             String c = spannable.subSequence(position, position + 1).toString();
 
-            if (!inTag && c.equals(START_CHAR)) {
+            if (!inTag && c.equals(EmojiCodec.START_CHAR)) {
                 buffer = new StringBuilder();
                 tagStartPosition = position;
                 Log.d(TAG, "   Entering tag at " + tagStartPosition);
@@ -100,26 +109,22 @@ public class EmojiEditText extends EditText {
                 tagLength++;
 
                 // Have we reached end of the tag?
-                if (c.equals(END_CHAR)) {
+                if (c.equals(EmojiCodec.END_CHAR)) {
                     inTag = false;
 
                     String tag = buffer.toString();
                     int tagEnd = tagStartPosition + tagLength;
 
-                    Log.d(TAG, "Tag: " + tag + ", started at: "
-                            + tagStartPosition + ", finished at " + tagEnd
-                            + ", length: " + tagLength);
+                    Log.d(TAG, "Tag: " + tag + ", started at: " + tagStartPosition
+                            + ", finished at " + tagEnd + ", length: " + tagLength);
 
                     String hexStr = tag.substring(1, tag.length() - 1);
                     try {
-                        int id = getContext().getResources().getIdentifier(
-                                "emoji_" + hexStr, "drawable", getContext().getPackageName());
-                        Drawable emoji = getContext().getResources()
-                                .getDrawable(id);
-                        emoji.setBounds(0, 0, this.getLineHeight(),
-                                this.getLineHeight());
-                        ImageSpan imageSpan = new ImageSpan(emoji,
-                                ImageSpan.ALIGN_BOTTOM);
+                        int id = getContext().getResources().getIdentifier("emoji_" + hexStr,
+                                "drawable", getContext().getPackageName());
+                        Drawable emoji = getContext().getResources().getDrawable(id);
+                        emoji.setBounds(0, 0, this.getLineHeight(), this.getLineHeight());
+                        ImageSpan imageSpan = new ImageSpan(emoji, ImageSpan.ALIGN_BOTTOM);
                         spannable.setSpan(imageSpan, tagStartPosition, tagEnd,
                                 Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
                     } catch (Exception e) {

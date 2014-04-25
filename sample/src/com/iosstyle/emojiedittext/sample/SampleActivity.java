@@ -17,6 +17,7 @@ public class SampleActivity extends Activity {
     EmojiEditText myEditText = null;
     EditText normalEditText = null;
     byte[]  bytes = {103, 104, 104, 32, 98, 97, 110, 100, 105, 116, 32, 104, -16, -97, -110, -91, -16, -97, -110, -94, -16, -97, -110, -90, -16, -97, -111, -119, -16, -97, -111, -121, -16, -97, -111, -119};
+    byte[] bytes2 = {-16, -97, -116, -103, -16, -97, -115, -122, -16, -97, -115, -105, -16, -97, -115, -70};
     Handler mUiHandler;
     int position = 1;
     
@@ -29,6 +30,7 @@ public class SampleActivity extends Activity {
         myEditText = (EmojiEditText)findViewById(R.id.my_edit_text);
         normalEditText = (EditText)findViewById(R.id.edit_text);
         final String str = new String(bytes, Charset.forName("UTF-8"));
+        final String str2 = new String(bytes2, Charset.forName("UTF-8"));
         char[] charArray = str.toCharArray();
         int codePointLength = str.codePointCount(0, str.length()-1);
         Log.d("Denny", "str is:"+str+",str length:"+str.length()+",charArray length:"+charArray.length
@@ -47,10 +49,12 @@ public class SampleActivity extends Activity {
         }, 1000);*/
         byte[] emoji1 = {-16,-97,-111, -119};
         //myEditText.setText(new String(emoji1,Charset.forName("UTF-8")));
-        normalEditText.setText(new String(emoji1,Charset.forName("UTF-8")));
-        String emojiStr = EmojiCodec.getInstance(getApplicationContext()).formatToEmojiString(str);
+        normalEditText.setText(str2);
+        String emojiStr = EmojiCodec.getInstance(getApplicationContext()).convertToEmojiString(str2);
         myEditText.setText(emojiStr);
         Log.d("Denny","emojiStr:"+emojiStr);
+        String originStr = EmojiCodec.getInstance(getApplicationContext()).getOriginString(emojiStr);
+        Log.d("Denny","originStr:"+originStr);
     }
 
 }
